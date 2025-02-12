@@ -38,7 +38,7 @@ const NavBar = () => {
                             {link.label === "Cart" && ` (${cartItems.length})`}
                         </Link>
                     ))}
-                    <span className='bg-black pt-2 px-2 pb-[2px] rounded-full'> <DropdownMenu /></span>
+                    <DropdownMenu />
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -61,9 +61,7 @@ const NavBar = () => {
                                     {link.label === "Cart" && ` (${cartItems.length})`}
                                 </Link>
                             ))}
-                            <span className="bg-black pt-2 px-2 pb-[2px] rounded-full">
                                 <DropdownMenu />
-                            </span>
                         </div>
                     </div>
                 )}

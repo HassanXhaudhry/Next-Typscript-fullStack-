@@ -11,9 +11,9 @@ import { addToCart } from "@/lib/redux/cartSlice";
 interface Product {
   id: string;
   title: string;
-  description: string;
   price: number;
   image: string;
+  description: string;
 }
 
 const ProductsDashboard = () => {
@@ -59,7 +59,7 @@ const ProductsDashboard = () => {
             <p className="text-[8px]">{product.description}</p>
             <p className="text-gray-700 py-2 text-sm font-bold">${product.price}</p>
             <button
-              onClick={() => dispatch(addToCart(product.id))}
+              onClick={() => dispatch(addToCart(product))}
               className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
               Add to Cart

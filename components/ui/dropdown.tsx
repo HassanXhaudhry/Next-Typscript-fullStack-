@@ -51,7 +51,7 @@ const DropdownMenu: React.FC = () => {
     <Dropdown menu={{ items }}>
       <span style={{ cursor: "pointer" }}>
         <Space>
-          <User className="h-6 w-6 text-white" />
+          <User className="h-6 w-6 text-black mt-1" />
         </Space>
       </span>
     </Dropdown>
