@@ -8,12 +8,13 @@ import { login } from '@/lib/redux/authSlice';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from 'next/link';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -22,6 +23,7 @@ export default function Login() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isAuthenticated, loading, error } = useAppSelector((state) => state.auth);
+    const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -40,41 +42,57 @@ export default function Login() {
   const onSubmit = async (data: LoginForm) => {
     await dispatch(login(data));
   };
-
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
+      <div className="max-w-md w-full space-y-8 p-8 px-12 bg-white rounded-xl shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form className="mt-4 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
               <Input
                 {...register('email')}
                 type="email"
                 placeholder="Email address"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-full h-9 border border-gray-400 pl-4 sm:text-sm text-md focus:outline-none focus:ring-0 transition"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
               )}
             </div>
-            <div>
+            <div className='relative flex'>
               <Input
                 {...register('password')}
-                type="password"
+                type={showPassword ? "password" : "text"}
                 placeholder="Password"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-full h-9 border border-gray-400 pl-4 sm:text-sm text-md focus:outline-none focus:ring-0 transition"
               />
+              <div className="absolute text-md right-[20px] top-[10px] text-[#6C6C6C] cursor-pointer">
+                {showPassword ? (
+                  <FiEye onClick={togglePassword} />
+                ) : (
+                  <FiEyeOff onClick={togglePassword} />
+                )}
+              </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
               )}
             </div>
           </div>
-
+          <div className="text-xs text-right">
+            <Link
+              href="/auth/forgotPassword"
+              className="font-medium text-gray-500 hover:text-gray-700"
+            >
+              Forgot Password?
+            </Link>
+          </div>
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
           <div>

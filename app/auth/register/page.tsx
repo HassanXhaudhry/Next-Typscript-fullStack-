@@ -8,13 +8,32 @@ import { register as registerUser } from '@/lib/redux/authSlice';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from 'next/link';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .refine(
+      (value) => /[A-Z]/.test(value),
+      'Password must contain at least one uppercase letter'
+    )
+    .refine(
+      (value) => /[#$*&@%!]/.test(value),
+      'Password must contain at least one special characters'
+    )
+    .refine(
+      (value) => /\d/.test(value),
+      'Password must contain at least one number'
+    ),
+  confirmPassword: z.string().min(8, 'Confirm Password must be at least 8 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -23,6 +42,8 @@ export default function Register() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isAuthenticated, loading, error } = useAppSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -39,14 +60,21 @@ export default function Register() {
   }, [isAuthenticated, router]);
 
   const onSubmit = async (data: RegisterForm) => {
-    await dispatch(registerUser(data));
+    const { confirmPassword, ...userData } = data;
+    await dispatch(registerUser(userData));
+  };
+  const toggleSignupPassword = () => {
+    setShowPassword(!showPassword);
+  };
+  const toggleConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
+      <div className="max-w-md w-full space-y-8 p-6 px-12 bg-white rounded-xl shadow-lg">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Create your account
           </h2>
         </div>
@@ -57,10 +85,10 @@ export default function Register() {
                 {...register('name')}
                 type="text"
                 placeholder="Name"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-full h-9 border border-gray-400 pl-4 sm:text-sm text-md focus:outline-none focus:ring-0 transition"
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>
               )}
             </div>
             <div>
@@ -68,23 +96,49 @@ export default function Register() {
                 {...register('email')}
                 type="email"
                 placeholder="Email address"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-full h-9 border border-gray-400 pl-4 sm:text-sm text-md focus:outline-none focus:ring-0 transition"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
               )}
             </div>
-            <div>
+            <div className='relative flex sm:w-[300px] w-[200px]'>
               <Input
                 {...register('password')}
-                type="password"
+                type={showPassword ? "password" : "text"}
                 placeholder="Password"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-72 h-9 border border-gray-400 px-2 rounded-lg sm:text-xs text-[11px] focus:outline-none focus:ring-0"
               />
+              <div className="absolute text-md right-[20px] top-[10px] text-[#6C6C6C] cursor-pointer">
+                {showPassword ? (
+                  <FiEye onClick={toggleSignupPassword} />
+                ) : (
+                  <FiEyeOff onClick={toggleSignupPassword} />
+                )}
+              </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
               )}
             </div>
+            <div className='relative flex'>
+              <Input
+                {...register('confirmPassword')}
+                type={showConfirmPassword ? "password" : "text"}
+                placeholder="Confirm Password"
+                className="w-full h-9 border border-gray-400 pl-4 sm:text-sm text-md focus:outline-none focus:ring-0 transition"
+              />
+              <div className="absolute text-md right-[20px] top-[10px] text-[#6C6C6C] cursor-pointer">
+                {showConfirmPassword ? (
+                  <FiEye onClick={toggleConfirmPassword} />
+                ) : (
+                  <FiEyeOff onClick={toggleConfirmPassword} />
+                )}
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+
           </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}
